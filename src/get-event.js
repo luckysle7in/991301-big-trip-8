@@ -129,11 +129,22 @@ const getOffersCode = (offers) => {
 };
 
 // Transform time format from 4:5 to 04:05
-const padZero = (n) => {
-  if (n < 10) {
-    return `0${n}`;
+const getTimeFromTimestamp = (timestamp) => {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, `0`);
+  const minutes = date.getMinutes().toString().padStart(2, `0`);
+  return `${hours}:${minutes}`;
+};
+
+// Transform number of minutes to "1h 30m" format
+const getTimeFromMinutes = (minutesCount) => {
+  const hours = Math.floor(minutesCount / 60);
+  const minutes = minutesCount % 60;
+  if (hours) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
   }
-  return n;
 };
 
 // Get code for the list of the events
@@ -146,13 +157,12 @@ const getEventsCode = (eventsData) => {
         <h3 class="trip-point__title">${event.type.name} to ${event.city}</h3>
         <p class="trip-point__schedule">
           <span class="trip-point__timetable">
-            ${padZero(new Date(event.startDate).getHours())}:${padZero(new Date(event.startDate).getMinutes())}
+            ${getTimeFromTimestamp(event.startDate)}
             &nbsp;&mdash;
-            ${padZero(new Date(event.startDate + event.duration * 60 * 1000).getHours())}:${padZero(new Date(event.startDate + event.duration * 60 * 1000).getMinutes())}
+            ${getTimeFromTimestamp(event.startDate + event.duration * 60 * 1000)}
           </span>
           <span class="trip-point__duration">
-            ${Math.floor(event.duration / 60) ? `${Math.floor(event.duration / 60)}h` : ``}
-            ${event.duration % 60 ? `${event.duration % 60}m` : ``}
+            ${getTimeFromMinutes(event.duration)}
           </span>
         </p>
         <p class="trip-point__price">&euro;&nbsp;${event.price}</p>
@@ -171,3 +181,5 @@ export default (eventsCount) => {
   }
   return getEventsCode(eventsData);
 };
+
+export {getRandomNumber};
