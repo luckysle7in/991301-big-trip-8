@@ -1,3 +1,7 @@
+import {Event} from "./event.js";
+import {EventFull} from "./event-full.js";
+
+
 // Get random number from 0 to MAX
 const getRandomNumber = (max, min = 0) => {
   return Math.floor(Math.random() * (max - min) + min);
@@ -37,8 +41,13 @@ const getEventCity = () => {
 };
 
 // Get random event picture
-const getEventPicture = () => {
-  return `http://picsum.photos/100/100?r=${Math.random()}`;
+const getEventPictures = () => {
+  const count = getRandomNumber(10, 5);
+  let pictures = new Set();
+  for (let i = 0; i < count; i++) {
+    pictures.add(`http://picsum.photos/300/300?r=${Math.random()}`);
+  }
+  return pictures;
 };
 
 // All offer variants
@@ -105,7 +114,7 @@ const getEventData = () => {
   return {
     type: getTaskType(),
     city: getEventCity(),
-    picture: getEventPicture(),
+    pictures: getEventPictures(),
     offers: getEventOffer(),
     description: getEventDescription(),
     startDate: getStartDate(),
@@ -114,72 +123,37 @@ const getEventData = () => {
   };
 };
 
-// Get code of offers
-const getOffersCode = (offers) => {
-  let offersCode = `<ul class="trip-point__offers">`;
-  offers.forEach((offer) => {
-    offersCode += `
-      <li>
-        <button class="trip-point__offer">${offer}</button>
-      </li>
-    `;
-  });
-  offersCode += `</ul>`;
-  return offersCode;
-};
+// Put a few tasks to the booard
+export default (eventsNumber, container) => {
+  // Remove everything from tasts board
+  container.innerHTML = ``;
 
-// Transform time format from 4:5 to 04:05
-const getTimeFromTimestamp = (timestamp) => {
-  const date = new Date(timestamp);
-  const hours = date.getHours().toString().padStart(2, `0`);
-  const minutes = date.getMinutes().toString().padStart(2, `0`);
-  return `${hours}:${minutes}`;
-};
+  // Generate a few events
+  for (let i = 0; i < eventsNumber; i++) {
+    // Generate new data for the task
+    const eventData = getEventData();
 
-// Transform number of minutes to "1h 30m" format
-const getTimeFromMinutes = (minutesCount) => {
-  const hours = Math.floor(minutesCount / 60);
-  const minutes = minutesCount % 60;
-  if (hours) {
-    return `${hours}h ${minutes}m`;
-  } else {
-    return `${minutes}m`;
+    // Create classes for default and edit states
+    const eventInstance = new Event(eventData);
+    const eventFullInstance = new EventFull(eventData);
+
+    // Add default state to the page
+    container.appendChild(eventInstance.render());
+
+    // 'Edit' event for the event card
+    eventInstance.onEdit = () => {
+      eventFullInstance.render();
+      container.replaceChild(eventFullInstance.element, eventInstance.element);
+      eventInstance.unrender();
+    };
+
+    // 'Submit' event for the event card
+    eventFullInstance.onSubmit = () => {
+      eventInstance.render();
+      container.replaceChild(eventInstance.element, eventFullInstance.element);
+      eventFullInstance.unrender();
+    };
   }
-};
-
-// Get code for the list of the events
-const getEventsCode = (eventsData) => {
-  let eventsDataCode = ``;
-  eventsData.forEach((event) => {
-    eventsDataCode += `
-      <article class="trip-point">
-        <i class="trip-icon">${event.type.icon}</i>
-        <h3 class="trip-point__title">${event.type.name} to ${event.city}</h3>
-        <p class="trip-point__schedule">
-          <span class="trip-point__timetable">
-            ${getTimeFromTimestamp(event.startDate)}
-            &nbsp;&mdash;
-            ${getTimeFromTimestamp(event.startDate + event.duration * 60 * 1000)}
-          </span>
-          <span class="trip-point__duration">
-            ${getTimeFromMinutes(event.duration)}
-          </span>
-        </p>
-        <p class="trip-point__price">&euro;&nbsp;${event.price}</p>
-        ${getOffersCode(event.offers)}
-      </article>
-    `;
-  });
-  return eventsDataCode;
-};
-
-// Get code for the list of the events
-export default (eventsCount) => {
-  let eventsData = [];
-  for (let i = 0; i < eventsCount; i++) {
-    eventsData.push(getEventData());
-  }
-  return getEventsCode(eventsData);
 };
 
 export {getRandomNumber};
