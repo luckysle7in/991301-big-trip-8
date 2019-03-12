@@ -8,13 +8,13 @@ const eventsNode = document.getElementById(`trip-day__items`);
 filtersNode.innerHTML = getFiltersCode();
 
 // Get code for the initial list of events
-eventsNode.innerHTML = getEventsCode(7);
+getEventsCode(7, eventsNode);
 
 filtersNode.addEventListener(`click`, (event) => {
   let target = event.target;
   while (target !== filtersNode) {
     if (target.tagName === `LABEL`) {
-      eventsNode.innerHTML = getEventsCode(getRandomNumber(9, 1));
+      getEventsCode(getRandomNumber(9, 1), eventsNode);
     }
     target = target.parentNode;
   }
