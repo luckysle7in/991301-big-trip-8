@@ -1,9 +1,10 @@
-import createElement from "./create-element.js";
+import {Component} from "./component.js";
 import {getTimeFromTimestamp, getTimeFromMinutes} from "./get-time-format.js";
 
 // Class of Event
-class Event {
+class Event extends Component {
   constructor(data) {
+    super();
     this._type = data.type;
     this._city = data.city;
     this._picture = data.picture;
@@ -14,19 +15,15 @@ class Event {
     this._price = data.price;
 
     this._element = null;
-    this._state = {
-      isFull: false
-    };
+    this._onEdit = null;
+
+    this._onEditButtonClick = this._onEditButtonClick.bind(this);
   }
 
   _onEditButtonClick() {
     if (typeof this._onEdit === `function`) {
       this._onEdit();
     }
-  }
-
-  get element() {
-    return this._element;
   }
 
   set onEdit(fn) {
@@ -68,17 +65,6 @@ class Event {
 
   unbind() {
     this._element.querySelector(`.trip-point`).removeEventListener(`click`, this._onEditButtonClick.bind(this));
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
-  unrender() {
-    this.unbind();
-    this._element = null;
   }
 }
 

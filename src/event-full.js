@@ -1,9 +1,10 @@
-import createElement from "./create-element.js";
+import {Component} from "./component.js";
 import {getTimeFromTimestamp} from "./get-time-format.js";
 
 // Class of Event
-class EventFull {
+class EventFull extends Component {
   constructor(data) {
+    super();
     this._type = data.type;
     this._city = data.city;
     this._pictures = data.pictures;
@@ -14,9 +15,9 @@ class EventFull {
     this._price = data.price;
 
     this._element = null;
-    this._state = {
-      isFull: false
-    };
+    this._onSubmit = null;
+
+    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
   }
 
   _onSubmitButtonClick(evt) {
@@ -24,10 +25,6 @@ class EventFull {
     if (typeof this._onSubmit === `function`) {
       this._onSubmit();
     }
-  }
-
-  get element() {
-    return this._element;
   }
 
   set onSubmit(fn) {
@@ -149,17 +146,6 @@ class EventFull {
 
   unbind() {
     this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSubmitButtonClick.bind(this));
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
-  unrender() {
-    this.unbind();
-    this._element = null;
   }
 }
 
