@@ -1,3 +1,4 @@
+import flatpickr from "flatpickr";
 import {Component} from "./component.js";
 import {getTimeFromTimestamp} from "./get-time-format.js";
 
@@ -22,6 +23,15 @@ class EventFull extends Component {
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
+
+    console.log("Saving event...");
+    const formData = new FormData(this._element.querySelector(`.event__form`));
+
+    for (const pair of formData.entries()) {
+      const [fieldName, fieldValue] = pair;
+      console.log(fieldName, fieldValue);
+    }
+
     if (typeof this._onSubmit === `function`) {
       this._onSubmit();
     }
@@ -34,7 +44,7 @@ class EventFull extends Component {
   get template() {
     return `
       <article class="point">
-        <form action="" method="get">
+        <form class="event__form" action="" method="get">
           <header class="point__header">
             <label class="point__date">
               choose day
@@ -84,7 +94,7 @@ class EventFull extends Component {
 
             <label class="point__time">
               choose time
-              <input class="point__input" type="text" value="${getTimeFromTimestamp(this._startDate)} — ${getTimeFromTimestamp(this._startDate + this._duration * 60 * 1000)}" name="time" placeholder="00:00 — 00:00">
+              <input class="point__form_time_range point__input" type="text" value="${getTimeFromTimestamp(this._startDate)} — ${getTimeFromTimestamp(this._startDate + this._duration * 60 * 1000)}" name="time" placeholder="00:00 — 00:00">
             </label>
 
             <label class="point__price">
@@ -141,11 +151,21 @@ class EventFull extends Component {
   }
 
   bind() {
-    this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSubmitButtonClick.bind(this));
+    this._element.querySelector(`.point__button--save`)
+      .addEventListener(`click`, this._onSubmitButtonClick.bind(this));
+
+    // flatpickr(this._element.querySelector(`.point__form_time_range`),
+    //   {
+    //     enableTime: true,
+    //     noCalendar: true,
+    //     mode: "range",
+    //   }
+    // );
   }
 
   unbind() {
-    this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSubmitButtonClick.bind(this));
+    this._element.querySelector(`.point__button--save`)
+      .removeEventListener(`click`, this._onSubmitButtonClick.bind(this));
   }
 }
 
