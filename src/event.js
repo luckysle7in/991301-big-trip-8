@@ -1,5 +1,6 @@
 import {Component} from "./component.js";
 import {getTimeFromTimestamp, getTimeFromMinutes} from "./get-time-format.js";
+import moment from "moment";
 
 // Class of Event
 class Event extends Component {
@@ -11,8 +12,10 @@ class Event extends Component {
     this._offers = data.offers;
     this._description = data.description;
     this._startDate = data.startDate;
-    this._duration = data.duration;
+    this._finishDate = data.finishDate;
     this._price = data.price;
+    this._isFavorite = data.isFavorite;
+    this._isDeleted = data.isDeleted;
 
     this._element = null;
     this._onEdit = null;
@@ -39,10 +42,10 @@ class Event extends Component {
           <span class="trip-point__timetable">
             ${getTimeFromTimestamp(this._startDate)}
             &nbsp;&mdash;
-            ${getTimeFromTimestamp(this._startDate + this._duration * 60 * 1000)}
+            ${getTimeFromTimestamp(this._finishDate)}
           </span>
           <span class="trip-point__duration">
-            ${getTimeFromMinutes(this._duration)}
+            ${getTimeFromMinutes(moment(this._finishDate).diff(moment(this._startDate), `minutes`))}
           </span>
         </p>
         <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
@@ -50,7 +53,7 @@ class Event extends Component {
         ${Array.from(this._offers).map((offer) => {
     return `
             <li>
-              <button class="trip-point__offer">${offer}</button>
+              <button class="trip-point__offer">${offer.name} + €${offer.price} ${offer.isSelected ? ` ✓` : ``}</button>
             </li>
           `;
   }).join(``)}
@@ -66,6 +69,21 @@ class Event extends Component {
   unbind() {
     this._element.querySelector(`.trip-point`).removeEventListener(`click`, this._onEditButtonClick.bind(this));
   }
+
+  update(data) {
+    this._type = data.type;
+    this._city = data.city;
+    this._pictures = data.pictures;
+    this._offers = data.offers;
+    this._description = data.description;
+    this._startDate = data.startDate;
+    this._finishDate = data.finishDate;
+    this._price = data.price;
+    this._isFavorite = data.isFavorite;
+    this._isDeleted = data.isDeleted;
+
+  }
+
 }
 
 export {Event};
