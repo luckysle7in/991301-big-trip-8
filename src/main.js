@@ -1,21 +1,12 @@
 import getFiltersCode from "./get-filter.js";
-import getEventsCode, {getRandomNumber} from "./get-event.js";
+import renderEvents, {getAllEventsData} from "./get-event.js";
 
 const filtersNode = document.getElementById(`trip-filter`);
 const eventsNode = document.getElementById(`trip-day__items`);
 
-// Get code for filters
+// Render filters to the page
 filtersNode.innerHTML = getFiltersCode();
 
-// Get code for the initial list of events
-getEventsCode(7, eventsNode);
-
-filtersNode.addEventListener(`click`, (event) => {
-  let target = event.target;
-  while (target !== filtersNode) {
-    if (target.tagName === `LABEL`) {
-      getEventsCode(getRandomNumber(9, 1), eventsNode);
-    }
-    target = target.parentNode;
-  }
-});
+// Render events to the page
+const eventsData = getAllEventsData(7);
+renderEvents(eventsData, eventsNode);

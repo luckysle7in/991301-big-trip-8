@@ -1,29 +1,25 @@
 import {Event} from "./event.js";
 import {EventFull} from "./event-full.js";
-
-
-// Get random number from 0 to MAX
-const getRandomNumber = (max, min = 0) => {
-  return Math.floor(Math.random() * (max - min) + min);
-};
+import {getRandomNumber, getRandomBoolean} from "./random.js";
+import moment from "moment";
 
 // All types of events
 const eventTypes = [
-  {name: `Taxi`, icon: `🚕`},
-  {name: `Bus`, icon: `🚌`},
-  {name: `Train`, icon: `🚂`},
-  {name: `Ship`, icon: `🛳️`},
-  {name: `Transport`, icon: `🚊`},
-  {name: `Drive`, icon: `🚗`},
-  {name: `Flight`, icon: `✈️`},
-  {name: `Check-in`, icon: `🏨`},
-  {name: `Sightseeing`, icon: `🏛️`},
-  {name: `Restaurant`, icon: `🍴`},
+  {name: `taxi`, icon: `🚕`},
+  {name: `bus`, icon: `🚌`},
+  {name: `train`, icon: `🚂`},
+  // {name: `Ship`, icon: `🛳️`},
+  // {name: `Transport`, icon: `🚊`},
+  // {name: `Drive`, icon: `🚗`},
+  {name: `flight`, icon: `✈️`},
+  {name: `check-in`, icon: `🏨`},
+  {name: `sight-seeing`, icon: `🏛️`},
+  // {name: `Restaurant`, icon: `🍴`},
 ];
 
 // Get random event type
 const getTaskType = () => {
-  return eventTypes[getRandomNumber(eventTypes.length)];
+  return JSON.parse(JSON.stringify(eventTypes[getRandomNumber(eventTypes.length)]));
 };
 
 // All cities
@@ -63,7 +59,14 @@ const getEventOffer = () => {
   const count = getRandomNumber(3);
   let offers = new Set();
   for (let i = 0; i < count; i++) {
-    offers.add(eventOffers[getRandomNumber(eventOffers.length)]);
+    const newOffer = eventOffers[getRandomNumber(eventOffers.length)];
+    if (!Array.from(offers).filter((element) => element.name === newOffer).length) {
+      offers.add({
+        name: newOffer,
+        price: getRandomNumber(1, 5) * 5,
+        isSelected: getRandomBoolean(),
+      });
+    }
   }
   return offers;
 };
@@ -96,12 +99,20 @@ const getEventDescription = () => {
 
 // Get random date + 2 weeks from now
 const getStartDate = () => {
-  return Math.floor(Date.now() / 600000) * 600000 + Math.floor(Math.random() * 14 * 24 * 60 / 10) * 10 * 60 * 1000;
+  return moment()
+    .add(getRandomNumber(14), `days`)
+    .hours(getRandomNumber(20, 8))
+    .minutes(getRandomNumber(5) * 10)
+    .seconds(0)
+    .toDate();
 };
 
-// Get random event duration
-const getEventDuration = () => {
-  return Math.floor(getRandomNumber(180, 20) / 5) * 5;
+// Get finish date: + up to 6 hours
+const getFinishDate = (startDate) => {
+  return moment(startDate)
+    .add(getRandomNumber(5, 1), `hours`)
+    .add(getRandomNumber(5) * 10, `minutes`)
+    .toDate();
 };
 
 // Get random event price
@@ -111,27 +122,41 @@ const getEventPrice = () => {
 
 // Get new object for task
 const getEventData = () => {
+  const eventStartDate = getStartDate();
+  const eventFinishDate = getFinishDate(eventStartDate);
   return {
     type: getTaskType(),
     city: getEventCity(),
     pictures: getEventPictures(),
     offers: getEventOffer(),
     description: getEventDescription(),
-    startDate: getStartDate(),
-    duration: getEventDuration(),
+    startDate: eventStartDate,
+    finishDate: eventFinishDate,
     price: getEventPrice(),
+    isFavorite: getRandomBoolean(),
+    isDeleted: false,
   };
 };
 
+// Get array of objects for all events
+const getAllEventsData = (count) => {
+  const allEventsData = [];
+  for (let i = 0; i < count; i++) {
+    allEventsData.push(getEventData());
+  }
+  return allEventsData;
+};
+
 // Put a few tasks to the booard
-export default (eventsNumber, container) => {
+export default (eventsData, container) => {
   // Remove everything from tasts board
   container.innerHTML = ``;
 
   // Generate a few events
-  for (let i = 0; i < eventsNumber; i++) {
+  for (let i = 0; i < eventsData.length; i++) {
+
     // Generate new data for the task
-    const eventData = getEventData();
+    const eventData = eventsData[i];
 
     // Create classes for default and edit states
     const eventInstance = new Event(eventData);
@@ -147,13 +172,49 @@ export default (eventsNumber, container) => {
       eventInstance.unrender();
     };
 
-    // 'Submit' event for the event card
-    eventFullInstance.onSubmit = () => {
+    // Changing event type
+    eventFullInstance.onChangeEventType = (newEventType) => {
+      eventData.type.name = newEventType;
+      eventData.type.icon = eventTypes.find((element) => element.name === newEventType).icon;
+      eventInstance.update(eventData);
+      eventFullInstance.update(eventData);
+    };
+
+    // Changing favourite type
+    eventFullInstance.onChangeFavorite = (isFavorite) => {
+      eventData.isFavorite = isFavorite;
+      eventInstance.update(eventData);
+      eventFullInstance.update(eventData);
+    };
+
+    // 'Submit' event for the full event card
+    eventFullInstance.onSubmit = (newObject) => {
+      eventData.type.name = newObject.type;
+      eventData.type.icon = eventTypes.find((element) => element.name === newObject.type).icon;
+      eventData.city = newObject.city;
+      eventData.offers.forEach(function (eventElement) {
+        eventElement.isSelected = Boolean(newObject.offers.find((element) => element === eventElement.name));
+      });
+      eventData.startDate = newObject.startDate;
+      eventData.finishDate = newObject.finishDate;
+      eventData.price = newObject.price;
+
+      // Updating events
+      eventInstance.update(eventData);
       eventInstance.render();
       container.replaceChild(eventInstance.element, eventFullInstance.element);
+      eventFullInstance.update(eventData);
       eventFullInstance.unrender();
     };
+
+    // Deleting an event
+    eventFullInstance.onDelete = () => {
+      eventData.isDeleted = true;
+      container.removeChild(eventFullInstance.element);
+      eventFullInstance.unrender();
+    };
+
   }
 };
 
-export {getRandomNumber};
+export {getAllEventsData};
