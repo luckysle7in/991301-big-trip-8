@@ -53,22 +53,43 @@ class EventFull extends Component {
           break;
 
         case `day`:
-          eventData.startDate.setDate(moment(fieldValue).format(`D`));
-          eventData.startDate.setMonth(moment(fieldValue).format(`M`) - 1);
-          eventData.startDate.setYear(moment().format(`YYYY`));
-          eventData.finishDate.setDate(moment(fieldValue).format(`D`));
-          eventData.finishDate.setMonth(moment(fieldValue).format(`M`) - 1);
-          eventData.finishDate.setYear(moment().format(`YYYY`));
+          if (fieldValue) {
+            const fieldValueMoment = moment(fieldValue);
+            eventData.startDate.setDate(fieldValueMoment.date());
+            eventData.startDate.setMonth(fieldValueMoment.month());
+            eventData.startDate.setYear(moment().year());
+            eventData.finishDate.setDate(fieldValueMoment.date());
+            eventData.finishDate.setMonth(fieldValueMoment.month());
+            eventData.finishDate.setYear(moment().year());
+          } else {
+            const valueStartDate = moment(this._startDate);
+            eventData.startDate.setDate(valueStartDate.date());
+            eventData.startDate.setMonth(valueStartDate.month());
+            eventData.startDate.setYear(moment().year());
+            const valueFinishDate = moment(this._finishDate);
+            eventData.finishDate.setDate(valueFinishDate.date());
+            eventData.finishDate.setMonth(valueFinishDate.month());
+            eventData.finishDate.setYear(moment().year());
+          }
           break;
 
         case `time`:
-          const dateRange = fieldValue.split(` — `);
-          const timeOfStartDate = dateRange[0].split(`:`);
-          eventData.startDate.setHours(timeOfStartDate[0]);
-          eventData.startDate.setMinutes(timeOfStartDate[1]);
-          const timeOfFinishDate = dateRange[1].split(`:`);
-          eventData.finishDate.setHours(timeOfFinishDate[0]);
-          eventData.finishDate.setMinutes(timeOfFinishDate[1]);
+          if (fieldValue.length === 13) {
+            const dateRange = fieldValue.split(` — `);
+            const timeOfStartDate = dateRange[0].split(`:`);
+            eventData.startDate.setHours(timeOfStartDate[0]);
+            eventData.startDate.setMinutes(timeOfStartDate[1]);
+            const timeOfFinishDate = dateRange[1].split(`:`);
+            eventData.finishDate.setHours(timeOfFinishDate[0]);
+            eventData.finishDate.setMinutes(timeOfFinishDate[1]);
+          } else {
+            const valueStartDate = moment(this._startDate);
+            eventData.startDate.setHours(valueStartDate.hours());
+            eventData.startDate.setMinutes(valueStartDate.minutes());
+            const valueFinishDate = moment(this._finishDate);
+            eventData.finishDate.setHours(valueFinishDate.hours());
+            eventData.finishDate.setMinutes(valueFinishDate.minutes());
+          }
           break;
 
         case `price`:

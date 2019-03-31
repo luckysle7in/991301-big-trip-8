@@ -1,19 +1,7 @@
 import {Event} from "./event.js";
 import {EventFull} from "./event-full.js";
+import {getRandomNumber, getRandomBoolean} from "./random.js";
 import moment from "moment";
-
-
-// Get random number from 0 to MAX
-const getRandomNumber = (max, min = 0) => {
-  return Math.floor(Math.random() * (max - min) + min);
-};
-
-// Get random boolean
-const getRandomBoolean = () => {
-  const variants = [true, false];
-  return variants[getRandomNumber(2)];
-};
-
 
 // All types of events
 const eventTypes = [
@@ -205,7 +193,7 @@ export default (eventsData, container) => {
       eventData.type.icon = eventTypes.find((element) => element.name === newObject.type).icon;
       eventData.city = newObject.city;
       eventData.offers.forEach(function (eventElement) {
-        eventElement.isSelected = (newObject.offers.find((element) => element === eventElement.name)) ? true : false;
+        eventElement.isSelected = Boolean(newObject.offers.find((element) => element === eventElement.name));
       });
       eventData.startDate = newObject.startDate;
       eventData.finishDate = newObject.finishDate;
@@ -229,4 +217,4 @@ export default (eventsData, container) => {
   }
 };
 
-export {getRandomNumber, getAllEventsData};
+export {getAllEventsData};
