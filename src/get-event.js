@@ -97,9 +97,10 @@ const getEventDescription = () => {
   return descriptionArray.join(` `);
 };
 
-// Get random date + 2 weeks from now
+// Get random date +-1 weeks from now
 const getStartDate = () => {
   return moment()
+    .add(0 - getRandomNumber(7), `days`)
     .add(getRandomNumber(14), `days`)
     .hours(getRandomNumber(20, 8))
     .minutes(getRandomNumber(5) * 10)
